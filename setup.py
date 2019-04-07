@@ -3,7 +3,7 @@
 
 
 import setuptools
-import apsjournals
+import solman
 
 
 with open("README.md", "r") as fh:
@@ -11,13 +11,14 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(name='apsjournals',
-                 version=apsjournals.__version__,
-                 description='A pythonic interface for APS publications',
+                 version=solman.__version__,
+                 description='Solutions manual writing utility in Python.',
                  long_description=long_description,
                  long_description_content_type="text/markdown",
-                 url=apsjournals.__github_url__,
+                 url=solman.__github_url__,
                  author='James W. Kennington',
                  author_email='jameswkennington@gmail.com',
                  license='MIT',
                  packages=setuptools.find_packages(),
-                 zip_safe=False)
+                 zip_safe=False, 
+                 include_package_data=True)
