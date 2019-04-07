@@ -34,7 +34,7 @@ class SolutionGroupTest(unittest.TestCase):
                     else:
                         diff_lines = [(rline, eline) for rline, eline in zip(results_lines, expected_lines) if rline != eline]
                         msg += "\n\nOther:\nUnequal Lines:\n{}".format('\n'.join("\nDiffLine {:d}:\nExpected: {}\nGot: {}\n".format(n, l[0], l[1]) for n, l in enumerate(diff_lines)))
-                self.assertEqual(result, DEMO_TEX_FILE, msg=)
+                self.assertEqual(result, DEMO_TEX_FILE, msg=msg)
 
 
 DEMO_TEX_FILE = r"""
