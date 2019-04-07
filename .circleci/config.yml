@@ -40,6 +40,5 @@ jobs:
             mkdir ./test-reports
             nosetests --with-xunit --xunit-file ./test-reports/results.xml
 
-
       - store_test_results:
           path: test-reports/
