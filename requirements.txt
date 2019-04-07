@@ -1,0 +1,4 @@
+jinja2
+nose
+pyyaml
+pypandoc
