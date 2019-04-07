@@ -25,7 +25,7 @@ class SolutionGroupTest(unittest.TestCase):
             self.solns.with_meta_overrides(references_file=None).to_latex(tmp_file.as_posix())
             with open(tmp_file.as_posix(), 'r') as fid:
                 result = fid.read()
-                self.assertEqual(result, DEMO_TEX_FILE, msg="Expected:\n{}\n\nGot:\n{}".format(result, DEMO_TEX_FILE))
+                self.assertEqual(result, DEMO_TEX_FILE, msg="\nExpected:\n{}\n\nGot:\n{}".format(DEMO_TEX_FILE, result))
 
 
 DEMO_TEX_FILE = r"""
