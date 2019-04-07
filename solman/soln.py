@@ -84,6 +84,9 @@ class SolutionGroup:
                 if section.isdigit():
                     section = int(section)
                 files_by_section[section].append(file)
+            # Sort all values
+            for k in files_by_section:
+                files_by_section[k] = list(sorted(files_by_section[k]))
             setattr(self, cache_attr, files_by_section) 
         return getattr(self, cache_attr)
 
