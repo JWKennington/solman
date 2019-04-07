@@ -1,0 +1,22 @@
+\title{\VAR{SolutionTitle}}
+\author{\VAR{SolutionAuthor}}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\VAR{Abstract}
+\end{abstract}
+
+\VAR{Body}
+
+\BLOCK{ if Bib }
+\nocite{*}
+\bibliographystyle{natbib}
+\bibliography{ \VAR{Bib} }
+\BLOCK{ endif }
+
+\end{document}
