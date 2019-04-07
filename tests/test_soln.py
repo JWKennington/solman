@@ -44,6 +44,9 @@ DEMO_TEX_FILE = r"""
 
 \documentclass[12pt]{article}
 
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
 \usepackage[style=phys]{biblatex}
 \addbibresource{}
 
