@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-setuptools.setup(name='apsjournals',
+setuptools.setup(name='solman',
                  version=solman.__version__,
                  description='Solutions manual writing utility in Python.',
                  long_description=long_description,
