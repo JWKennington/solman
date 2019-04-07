@@ -25,8 +25,8 @@ class SolutionGroupTest(unittest.TestCase):
             self.solns.with_meta_overrides(references_file=None).to_latex(tmp_file.as_posix())
             with open(tmp_file.as_posix(), 'r') as fid:
                 result = fid.read()
+                msg = "\nExpected:\n{}\n\nGot:\n{}".format(DEMO_TEX_FILE, result)
                 if result != DEMO_TEX_FILE:
-                    msg = "\nExpected:\n{}\n\nGot:\n{}".format(DEMO_TEX_FILE, result)
                     results_lines = [line for line in result.split('\n') if line]
                     expected_lines = [line for line in DEMO_TEX_FILE.split('\n') if line]
                     if len(results_lines) != len(expected_lines):
