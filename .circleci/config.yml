@@ -1,0 +1,44 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          - v1-dependencies-
+
+      - run:
+          name: Install Non-Python Dependencies
+          command: |
+            sudo apt-get install pandoc
+
+      - run:
+          name: Setup Python Environment
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: Run Tests
+          command: |
+            . venv/bin/activate
+            mkdir ./test-reports
+            nosetests --with-xunit --xunit-file ./test-reports/results.xml
+
+      - store_test_results:
+          path: test-reports/
