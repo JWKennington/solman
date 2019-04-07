@@ -62,27 +62,27 @@ last on 04-06-2019
 \section{ Chapter 1 }
 \subsection{ Problem 1 }
 This is a sample solution for problem 1.1. The below is some latex that
-will be used in the solution \[\int_{a}^b f(x) dx = F(b) - F(a)\] In the
-above its clear that the define integral \(f\).
+will be used in the solution \[ \int_{a}^b f(x) dx = F(b) - F(a) \] In
+the above its clear that the define integral \$ f \$.
 
 
 \subsection{ Problem 2 }
 This is a sample solution for problem 1.2. The below is some latex that
-will be used in the solution \[a = b = c = d\] In the above its clear
-that \(inline\). The end.
+will be used in the solution \[ a = b = c = d \] In the above its clear
+that \$ inline \$. The end.
 
 
 \section{ Chapter 2 }
 \subsection{ Problem 1 }
 This is a sample solution for problem 2.1. The below is some latex that
-will be used in the solution \[\int_{a}^b f(x) dx = F(b) - F(a)\] In the
-above its clear that the define integral \(f\).
+will be used in the solution \[ \int_{a}^b f(x) dx = F(b) - F(a) \] In
+the above its clear that the define integral \$ f \$.
 
 
 \subsection{ Problem 2 }
 This is a sample solution for problem 2.2. The below is some latex that
-will be used in the solution \[a = b = c = d\] In the above its clear
-that \(inline\). The end.
+will be used in the solution \[ a = b = c = d \] In the above its clear
+that \$ inline \$. The end.
 
 
 
