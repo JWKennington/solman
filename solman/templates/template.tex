@@ -1,8 +1,11 @@
 \title{\VAR{SolutionTitle}}
 \author{\VAR{SolutionAuthor}}
-\date{\today}
+\date{\VAR{SolutionDate}}
 
 \documentclass[12pt]{article}
+
+\usepackage[style=phys]{biblatex}
+\addbibresource{\VAR{Bib}}
 
 \begin{document}
 \maketitle
@@ -11,12 +14,16 @@
 \VAR{Abstract}
 \end{abstract}
 
+\tableofcontents
+\newpage
+
 \VAR{Body}
 
 \BLOCK{ if Bib }
 \nocite{*}
-\bibliographystyle{natbib}
-\bibliography{ \VAR{Bib} }
+%\bibliographystyle{phys}
+%\bibliography{\VAR{Bib}}
+\printbibliography
 \BLOCK{ endif }
 
 \end{document}

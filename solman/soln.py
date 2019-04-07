@@ -8,23 +8,35 @@ import datetime
 import enum
 import pathlib
 import pypandoc
+import types
 import typing
 import yaml
 from solman import latex
 
 
-class MetaField(str, enum.Enum):
-    Author = 'Author'
-    Book = 'Book'
-    Category = 'Category'
-    ISBN = 'ISBN'
-    Name = 'Name'
-    ReferencesFile = 'ReferencesFile'
-    SectionPrefix = 'SectionPrefix'
-    SolutionAuthor = 'SolutionAuthor'
-    SolutionDate = 'SolutionDate'
-    Subcategory = 'Subcategory'
-    Tags = 'Tags'
+class SolManError(ValueError):
+    pass
+
+
+MetaField = collections.namedtuple('MetaField', 'key attr coercion required default')
+
+
+def meta_field(key: str, attr: str, coercion_func: types.FunctionType=None, required: bool=False, default: typing.Any=None):
+    return MetaField(key, attr, coercion_func, required, default)
+
+
+class MetaFields:
+    Author = meta_field('Author', 'author', required=True)
+    Book = meta_field('Book', 'book', required=True)
+    Category = meta_field('Category', 'category', required=True)
+    ISBN = meta_field('ISBN', 'isbn')
+    Name = meta_field('Name', 'name', required=True)
+    ReferencesFile = meta_field('ReferencesFile', 'references_file')
+    SectionPrefix = meta_field('SectionPrefix', 'section_prefix', default='Chapter')
+    SolutionAuthor = meta_field('SolutionAuthor', 'solution_author', required=True)
+    SolutionDate = meta_field('SolutionDate', 'solution_date', default=datetime.date.today(), coercion_func=lambda d: d if isinstance(d, datetime.date) else datetime.datetime.strptime(d, '%m-%d-%Y'))
+    Subcategory = meta_field('Subcategory', 'subcategory')
+    Tags = meta_field('Tags', 'tags', coercion_func=lambda comma_separated: tuple(comma_separated.split(',')))
 
 
 class ProblemType(str, enum.Enum):
@@ -33,34 +45,35 @@ class ProblemType(str, enum.Enum):
 
 
 class SolutionGroup:
-    def __init__(self, root: pathlib.Path):
+    __slots__ = ('_problems', '_exercises',
+                 'name', 'root',
+                 'author', 'book', 'isbn', 'references_file', 'section_prefix',
+                 'category', 'subcategory', 'tags',
+                 'solution_author', 'solution_date')
+
+    def __init__(self, name: str, root: pathlib.Path, author: str, book: str, category: str, solution_author: str, isbn: str=None, references_file: str=None, 
+                 section_prefix: str='Chapter', subcategory: str=None, tags: typing.List[str]=None, solution_date: datetime.date=None):
+        self.name = name
         self.root = root
+        self.author = author
+        self.book = book
+        self.isbn = isbn
+        self.references_file = references_file
+        self.section_prefix = section_prefix
+        self.category = category
+        self.subcategory = subcategory
+        self.tags = tags
+        self.solution_author = solution_author
+        if solution_date is None:
+            solution_date = datetime.date.today()
+        self.solution_date = solution_date
         self._problems = None
         self._exercises = None
-        self._init_meta()
 
     def __repr__(self):
         num_exercises = sum(len(v) for v in self.exercises.values())
         num_problems = sum(len(v) for v in self.problems.values())
         return 'SolutionGroup({}, {:d}P, {:d}E)'.format(self.name, num_problems, num_exercises)
-
-    def _init_meta(self):
-        meta_file = self.root / 'meta.yml'
-        with open(meta_file.as_posix()) as mfid:
-            meta = yaml.load(mfid)
-        self.author = meta.get(MetaField.Author, None)
-        self.book = meta.get(MetaField.Book, None)
-        self.category = meta.get(MetaField.Category, None)
-        self.isbn = meta.get(MetaField.ISBN, None)
-        self.name = meta.get(MetaField.Name, None)
-        self.references_file = meta.get(MetaField.ReferencesFile, None)
-        self.section_prefix = meta.get(MetaField.SectionPrefix, 'Chapter')
-        self.solution_author = meta.get(MetaField.SolutionAuthor, 'J. W. Kennington')
-        self.solution_date = meta.get(MetaField.SolutionDate, datetime.date.today())
-        self.subcategory = meta.get(MetaField.Subcategory, None)
-        self.tags= meta.get(MetaField.Tags, None)
-        if self.tags is not None:
-            self.tags = tuple(self.tags.split(','))
 
     def _lazy_get_files(self, cache_attr: str, problem_type: ProblemType):
         if getattr(self, cache_attr) is None:
@@ -86,14 +99,12 @@ class SolutionGroup:
         return "{name} Solutions".format(name=self.name)
 
     def summary(self) -> str:
-        return """
-        The following is a selection of solutions for various problems and exercises found
-        in {book} by {author}. These solutions were written by {solutions_author} and updated
-        last on {date}.
-        """.format(book=self.book,
-                   author=self.author,
-                   solutions_author=self.solution_author,
-                   date=datetime.datetime.strftime(self.solution_date, '%m-%d-%Y'))
+        return ("The following is a selection of solutions for various problems and exercises found \n"
+                "in {book} by {author}. These solutions were written by {solutions_author} and updated \n"
+                "last on {date}").format(book=self.book,
+                                         author=self.author,
+                                         solutions_author=self.solution_author,
+                                         date=datetime.datetime.strftime(self.solution_date, '%m-%d-%Y')).strip()
 
     def to_latex(self, outfile: typing.Union[str, pathlib.Path], problem_type: ProblemType=ProblemType.Problem):
         if isinstance(outfile, str):
@@ -104,14 +115,13 @@ class SolutionGroup:
             ProblemType.Problem: lambda: self.problems,
         }[problem_type]()
 
-        
-
         body_tex = '\n\n'.join(self._section_to_latex(section, files, problem_type) for section, files in sorted(files_by_section.items(), key=lambda x: x[0]))
         return latex.render_solutions_tex(title=self.title(), 
-                                          soln_author=self.solution_author, 
+                                          soln_author=self.solution_author,
+                                          soln_date=self.solution_date,
                                           abstract=self.summary(), 
                                           body=body_tex, 
-                                          bib_file=self.references_file,
+                                          bib_file=(self.root / self.references_file).as_posix() if self.references_file is not None else None,
                                           outfile=outfile.as_posix())
 
 
@@ -124,3 +134,48 @@ class SolutionGroup:
     def _section_to_latex(self, section, files, problem_type):
         return "{section}\n{content}".format(section='\\section{{ {} {} }}'.format(self.section_prefix, str(section)),
                                              content='\n\n'.join(self._file_to_latex(file, problem_type) for file in files))
+
+    @staticmethod
+    def from_meta(meta_file: pathlib.Path):
+        with open(meta_file.as_posix()) as mfid:
+            meta = yaml.load(mfid)
+
+        def get_meta_field(meta, field):
+            value = meta.get(field.key, field.default)
+            if value is None and field.required:
+                raise SolManError('Required field missing from config: {}'.format(field.key))
+            if field.coercion is not None:
+                value = field.coercion(value)
+            return value
+
+        kwargs = {field.attr: get_meta_field(meta, field) for field in
+                  [getattr(MetaFields, f) for f in dir(MetaFields) if
+                   not callable(getattr(MetaFields, f)) and not f.startswith('__')]}
+        kwargs['root'] = meta_file.parent
+        return SolutionGroup(**kwargs)
+
+    def with_meta_overrides(self, **meta_overrides):
+        """
+        name: str, root: pathlib.Path, author: str, book: str, category: str, solution_author: str, isbn: str=None, references_file: str=None, 
+                 section_prefix: str='Chapter', subcategory: str=None, tags: typing.List[str]=None, solution_date: datetime.date=None
+
+        """
+        kwargs = {
+            'name': self.name, 
+            'root': self.root, 
+            'author': self.author, 
+            'book': self.book, 
+            'category': self.category, 
+            'solution_author': self.solution_author,
+            'isbn': self.isbn, 
+            'references_file': self.references_file, 
+            'section_prefix': self.section_prefix, 
+            'subcategory': self.subcategory, 
+            'tags': self.tags, 
+            'solution_date': self.solution_date
+        }
+        kwargs.update(meta_overrides)
+        new = SolutionGroup(**kwargs)
+        new._problems = self.problems
+        new._exercises = self.exercises
+        return new
